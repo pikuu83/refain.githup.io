@@ -1,907 +1,825 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Refain • Premium Video Editing & YouTube Growth</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  
-  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-  
-  <style>
-    /* তোমার পুরো CSS একদম অপরিবর্তিত — কোনো লাইন পাল্টাই নাই */
-    :root {
-      --bg: #05050a;
-      --bg-card: #0d0d15;
-      --text: #f5f5ff;
-      --text-muted: #c0c0e8;
-      --accent: #70b8ff;
-      --accent-glow: rgba(112, 184, 255, 0.22);
-      --border: #181830;
-      --glow: rgba(112, 184, 255, 0.16);
-      
-      --font-base: 1.125rem;
-      --font-lg: 1.38rem;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Birthday Surprise 🎉</title>
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
-      line-height: 1.8;
-      font-size: var(--font-base);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+:root {
+  --navy:     #05091a;
+  --purple:   #6c2bd9;
+  --violet:   #9b59f5;
+  --cyan:     #00e5ff;
+  --cyan-dim: #0097b2;
+  --gold:     #ffd700;
+  --gold-dim: #b8860b;
+  --glass-bg:     rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.12);
+  --glow-cyan:   0 0 20px rgba(0,229,255,0.6), 0 0 50px rgba(0,229,255,0.2);
+  --glow-purple: 0 0 20px rgba(108,43,217,0.7), 0 0 50px rgba(108,43,217,0.3);
+}
 
-    #particles-js { 
-      position: fixed; 
-      inset: 0; 
-      z-index: -2; 
-      background: var(--bg); 
-    }
+html { height:100%; }
+body {
+  height:100%; overflow:hidden;
+  font-family:'Segoe UI', system-ui, sans-serif;
+  background: var(--navy); color:#fff;
+  -webkit-font-smoothing: antialiased;
+}
 
-    header {
-      position: fixed;
-      top: 0; left: 0; width: 100%;
-      z-index: 2000;
-      background: rgba(5, 5, 10, 0.96);
-      backdrop-filter: blur(18px);
-      border-bottom: 1px solid var(--border);
-      padding: 1.3rem 6%;
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
-      transform: translateY(0);
-      box-shadow: 0 4px 25px rgba(0,0,0,0.3);
-    }
+/* ============================================================
+   CANVAS (fireworks/confetti)
+   ============================================================ */
+#globalCanvas {
+  position:fixed; inset:0;
+  pointer-events:none; z-index:0;
+}
 
-    header.hidden {
-      transform: translateY(-100%);
-      box-shadow: none;
-    }
+/* ============================================================
+   MUSIC BUTTON
+   ============================================================ */
+#musicBtn {
+  position:fixed; top:14px; right:14px; z-index:9999;
+  display:none; align-items:center; gap:6px;
+  padding:8px 16px; border-radius:50px;
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  backdrop-filter:blur(12px); cursor:pointer;
+  color:var(--cyan); font-size:13px; font-weight:600;
+  animation:floatY 1.4s ease-in-out infinite alternate;
+}
+#musicBtn.show { display:flex; }
+@keyframes floatY { from{transform:translateY(0)} to{transform:translateY(-4px)} }
 
-    .header-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-    }
+/* ============================================================
+   SCREENS
+   — Each screen is a full-height scrollable column
+   ============================================================ */
+.screen {
+  position:fixed; inset:0; z-index:1;
+  display:flex; flex-direction:column;
+  align-items:center;
+  overflow-y:auto;           /* ← scroll enabled */
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.7s ease;
+  padding:40px 18px 60px;   /* top/bottom breathing room */
+}
+.screen.active { opacity:1; pointer-events:all; }
 
-    .brand {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(3.2rem, 7.8vw, 4.8rem);
-      font-weight: 800;
-      background: linear-gradient(90deg, #70b8ff, #e0f0ff, #a0d0ff, #70b8ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 40px var(--accent-glow);
-      letter-spacing: 6px;
-      animation: glow 5s ease-in-out infinite alternate;
-    }
+/* Scroll-hint arrow at bottom of each screen */
+.scroll-hint {
+  position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+  color:rgba(255,255,255,0.35); font-size:22px; z-index:2;
+  animation:bounce2 1.2s infinite;
+  pointer-events:none;
+}
+@keyframes bounce2 { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
 
-    @keyframes glow {
-      from { text-shadow: 0 0 18px var(--accent-glow); }
-      to   { text-shadow: 0 0 50px var(--accent-glow), 0 0 80px rgba(112,184,255,0.35); }
-    }
+/* ============================================================
+   SHARED BUTTON STYLES
+   ============================================================ */
+.btn-glow {
+  display:inline-block; padding:15px 40px; border-radius:50px;
+  border:none; cursor:pointer; font-weight:700; font-size:clamp(1rem,2.5vw,1.15rem);
+  background:linear-gradient(135deg, var(--purple), var(--cyan-dim));
+  color:#fff; box-shadow:var(--glow-purple);
+  transition:transform 0.2s, box-shadow 0.2s;
+  position:relative; overflow:hidden;
+}
+.btn-glow::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent);
+  border-radius:inherit;
+}
+.btn-glow:hover { transform:scale(1.06); box-shadow:var(--glow-cyan); }
+.btn-glow:active { transform:scale(0.95); }
 
-    #loginBtn {
-      color: var(--accent);
-      font-weight: 600;
-      font-size: clamp(1.1rem, 2.5vw, 1.35rem);
-      text-decoration: none;
-      padding: 0.8rem 1.6rem;
-      border: 1px solid var(--accent);
-      border-radius: 12px;
-      transition: all 0.3s ease;
-      background: rgba(112, 184, 255, 0.08);
-      cursor: pointer;
-    }
+.btn-outline {
+  display:inline-block; padding:14px 36px; border-radius:50px;
+  border:1.5px solid var(--cyan); background:transparent; color:var(--cyan);
+  font-size:clamp(0.95rem,2vw,1.1rem); font-weight:700; cursor:pointer;
+  box-shadow:var(--glow-cyan); transition:all 0.3s;
+}
+.btn-outline:hover { background:var(--cyan); color:var(--navy); transform:scale(1.05); }
+.btn-outline:active { transform:scale(0.95); }
 
-    #loginBtn:hover {
-      background: var(--accent);
-      color: #000;
-      box-shadow: 0 0 20px var(--accent-glow);
-    }
+.btn-hidden { opacity:0; pointer-events:none; transition:opacity 0.5s; }
+.btn-hidden.show { opacity:1; pointer-events:all; }
 
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 4rem;
-      margin-top: 1.2rem;
-    }
+/* ============================================================
+   SCREEN 1 — WELCOME
+   ============================================================ */
+#s1 {
+  background:radial-gradient(ellipse at 50% 60%, #1a0a3a 0%, #05091a 70%);
+  justify-content:center; min-height:100%;
+}
+.s1-stars { position:fixed; inset:0; overflow:hidden; pointer-events:none; }
+.s1-stars span {
+  position:absolute; border-radius:50%; background:#fff;
+  animation:twinkle var(--d,3s) var(--del,0s) infinite alternate ease-in-out;
+}
+@keyframes twinkle { from{opacity:0.08;transform:scale(1)} to{opacity:1;transform:scale(1.5)} }
 
-    nav a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: clamp(1.25rem, 2.8vw, 1.55rem);
-      transition: all 0.35s ease;
-      position: relative;
-      padding: 0.9rem 0;
-      letter-spacing: 0.5px;
-    }
+.welcome-card {
+  position:relative; z-index:1;
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  border-radius:28px; backdrop-filter:blur(20px);
+  padding:clamp(28px,6vw,60px) clamp(24px,7vw,72px);
+  text-align:center; max-width:min(580px,94vw);
+  box-shadow:var(--glow-purple), inset 0 1px 0 rgba(255,255,255,0.1);
+  animation:cardFloat 4s ease-in-out infinite;
+}
+@keyframes cardFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
 
-    nav a:hover, nav a.active { color: var(--accent); }
-    nav a::after {
-      content: '';
-      position: absolute;
-      width: 0; height: 4px;
-      bottom: 0; left: 0;
-      background: var(--accent);
-      transition: width 0.45s ease;
-    }
-    nav a:hover::after, nav a.active::after { width: 100%; }
+.welcome-emoji { font-size:clamp(44px,10vw,72px); display:block; margin-bottom:14px; animation:emojiPop 1.4s infinite; }
+@keyframes emojiPop { 0%,100%{transform:scale(1) translateY(0)} 50%{transform:scale(1.15) translateY(-8px)} }
 
-    main { padding-top: 280px; }
+.welcome-title {
+  font-size:clamp(1.3rem,4vw,2.2rem); font-weight:800; line-height:1.3; margin-bottom:10px;
+  background:linear-gradient(135deg,var(--cyan),var(--violet),var(--gold));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.name-badge {
+  background:linear-gradient(135deg,var(--gold),var(--cyan));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  font-weight:900;
+}
+.welcome-sub { color:rgba(255,255,255,0.55); font-size:clamp(0.9rem,2vw,1.1rem); margin-bottom:30px; }
 
-    .section { display: none; padding: 60px 6% 140px; max-width: 1480px; margin: 0 auto; }
-    .section.active { display: block; }
+/* ============================================================
+   SCREEN 2 — ROCKET TRANSITION
+   ============================================================ */
+#s2 {
+  background:radial-gradient(ellipse at 50% 80%, #0d1a3a 0%, #030710 100%);
+  justify-content:center; min-height:100%;
+}
+.rocket-wrap { display:flex; flex-direction:column; align-items:center; gap:22px; }
+.rocket-emoji { font-size:clamp(60px,14vw,100px); animation:rocketUp 2.2s ease-in forwards; }
+@keyframes rocketUp { 0%{transform:translateY(0) scale(1)} 20%{transform:translateY(-14px) scale(1.08)} 100%{transform:translateY(-130vh) scale(0.2)} }
+.loading-text { font-size:clamp(1rem,2.5vw,1.35rem); color:var(--cyan); text-align:center; animation:pulse 1.2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.dots span { display:inline-block; animation:dotAnim 1.4s infinite; }
+.dots span:nth-child(2){ animation-delay:.2s; }
+.dots span:nth-child(3){ animation-delay:.4s; }
+@keyframes dotAnim { 0%,100%{opacity:0} 50%{opacity:1} }
 
-    h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 700; line-height: 1.3; text-shadow: 0 3px 12px rgba(0,0,0,0.7); }
+/* ============================================================
+   SCREEN 3 — BIRTHDAY CELEBRATION
+   ============================================================ */
+#s3 { background:radial-gradient(ellipse at 50% 30%, #1a0b40 0%, #030710 80%); }
 
-    .highlight {
-      background: linear-gradient(90deg, var(--accent), #d0f0ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+.bday-header {
+  font-size:clamp(1.5rem,5vw,3rem); font-weight:900; text-align:center;
+  background:linear-gradient(90deg,var(--gold),var(--cyan),var(--violet),var(--gold));
+  background-size:200%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  animation:shimmer 3s linear infinite; margin-bottom:24px; padding-top:10px;
+}
+@keyframes shimmer { 0%{background-position:0%} 100%{background-position:200%} }
 
-    h2.section-title {
-      font-size: clamp(3.2rem, 8.5vw, 5.2rem);
-      text-align: center;
-      margin-bottom: 4rem;
-      background: linear-gradient(90deg, #fff, var(--accent), #fff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: title-glow 7s ease-in-out infinite alternate;
-    }
+.cake-wrap { width:clamp(150px,35vw,210px); margin:0 auto 24px; }
+.cake-svg { width:100%; filter:drop-shadow(0 0 18px rgba(255,215,0,0.5)); }
+.flame { animation:flicker 0.55s infinite alternate ease-in-out; transform-origin:50% 100%; }
+.flame:nth-child(2){ animation-delay:.1s; }
+.flame:nth-child(3){ animation-delay:.22s; }
+.flame:nth-child(4){ animation-delay:.07s; }
+.flame:nth-child(5){ animation-delay:.18s; }
+@keyframes flicker { 0%{transform:scale(1,1) skewX(0)} 100%{transform:scale(0.82,1.15) skewX(5deg)} }
 
-    @keyframes title-glow {
-      from { text-shadow: 0 0 20px rgba(112,184,255,0.4); }
-      to   { text-shadow: 0 0 55px rgba(112,184,255,0.8); }
-    }
+.bday-msg-wrap {
+  max-width:min(660px,94vw); width:100%;
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  border-radius:20px; backdrop-filter:blur(16px);
+  padding:22px 26px; text-align:center;
+  font-size:clamp(0.95rem,2vw,1.15rem); color:rgba(255,255,255,0.85);
+  line-height:1.85; box-shadow:var(--glow-purple); margin-bottom:28px;
+}
+#typingMsg::after { content:'|'; animation:blink 0.7s infinite; color:var(--cyan); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-    .hero-video {
-      margin: 7rem auto 6rem;
-      max-width: 1200px;
-      aspect-ratio: 16/9;
-      background: #080818;
-      border-radius: 32px;
-      border: 1px solid var(--border);
-      box-shadow: 0 30px 80px rgba(0,0,0,0.8), inset 0 0 60px var(--glow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-size: 2.2rem;
-    }
+/* ============================================================
+   SCREEN 4 — GIFT BOX
+   ============================================================ */
+#s4 { background:radial-gradient(ellipse at 50% 40%, #0f0a35 0%, #030710 80%); }
 
-    .hero-video::before { content: '▶ Your Premium Intro Video Here'; }
+.gift-section { text-align:center; width:100%; max-width:500px; }
+.gift-section h2 {
+  font-size:clamp(1.4rem,4vw,2.2rem); font-weight:800; margin-bottom:8px;
+  background:linear-gradient(135deg,var(--gold),var(--cyan));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.gift-sub { color:rgba(255,255,255,0.5); margin-bottom:24px; font-size:clamp(0.9rem,2vw,1rem); }
 
-    .testimonials, .services-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-      gap: 3.2rem;
-      margin-top: 5.5rem;
-    }
+.gift-box-wrap {
+  width:clamp(140px,40vw,190px); margin:0 auto 16px;
+  cursor:pointer; transition:transform 0.2s;
+}
+.gift-box-wrap:hover { transform:scale(1.07); }
+.gift-box-wrap:active { transform:scale(0.94); }
+.gift-svg { width:100%; filter:drop-shadow(0 0 22px rgba(108,43,217,0.7)); }
 
-    .testimonial, .service-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      padding: 2.8rem;
-      transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-      box-shadow: 0 15px 50px rgba(0,0,0,0.6);
-      position: relative;
-    }
+.gift-hint { font-size:clamp(0.85rem,2vw,1rem); color:var(--cyan); animation:pulse 1.5s infinite; margin-bottom:16px; }
+.gift-opened-msg {
+  font-size:clamp(1.1rem,3vw,1.6rem); font-weight:800; margin-bottom:22px;
+  background:linear-gradient(135deg,var(--gold),var(--violet));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  opacity:0; transform:scale(0.7); transition:opacity 0.5s, transform 0.5s;
+}
+.gift-opened-msg.show { opacity:1; transform:scale(1); }
 
-    .testimonial:hover, .service-card:hover {
-      transform: translateY(-14px) scale(1.02);
-      border-color: var(--accent);
-      box-shadow: 0 40px 100px var(--accent-glow);
-    }
+/* ============================================================
+   SCREEN 5 — WISHES
+   ============================================================ */
+#s5 { background:radial-gradient(ellipse at 50% 40%, #0c0a2e 0%, #030710 80%); }
 
-    .service-card img {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      border-bottom: 1px solid var(--border);
-      border-radius: 28px 28px 0 0;
-    }
+.wishes-wrap { width:100%; max-width:min(680px,94vw); }
+.section-title {
+  font-size:clamp(1.4rem,4vw,2.4rem); font-weight:800; text-align:center; margin-bottom:28px;
+  background:linear-gradient(90deg,var(--cyan),var(--violet));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
 
-    .service-content { padding: 2.4rem 0 0; }
+.wish-bubble {
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  border-radius:16px; padding:16px 22px; margin-bottom:14px;
+  display:flex; align-items:center; gap:14px;
+  font-size:clamp(0.95rem,2.2vw,1.15rem); color:rgba(255,255,255,0.88);
+  backdrop-filter:blur(12px);
+  opacity:0; transform:translateX(-36px);
+  transition:opacity 0.55s ease, transform 0.55s ease;
+}
+.wish-bubble.show { opacity:1; transform:translateX(0); }
+.wish-bubble .wi { font-size:1.4em; flex-shrink:0; }
 
-    .service-card h3 {
-      color: var(--accent);
-      font-size: clamp(1.9rem, 4.2vw, 2.4rem);
-      margin-bottom: 1.4rem;
-    }
+/* ============================================================
+   SCREEN 6 — ACHIEVEMENT CARDS
+   ============================================================ */
+#s6 { background:radial-gradient(ellipse at 50% 40%, #0e0830 0%, #030710 80%); }
 
-    .service-card p, .testimonial p {
-      color: var(--text-muted);
-      font-size: var(--font-lg);
-      line-height: 1.85;
-    }
+.achieve-wrap { width:100%; max-width:min(800px,96vw); text-align:center; }
 
-    .stars { color: #ffcc00; font-size: 1.9rem; margin-bottom: 1.4rem; }
+.cards-grid { display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-bottom:32px; }
 
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      padding: 3.2rem 2.8rem;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-      transition: all 0.4s ease;
-    }
+.ach-card {
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  border-radius:20px; padding:24px 18px; text-align:center;
+  width:clamp(120px,25vw,160px); backdrop-filter:blur(14px);
+  opacity:0; transform:translateY(36px) scale(0.85);
+  transition:opacity 0.5s, transform 0.5s, box-shadow 0.3s;
+}
+.ach-card.show { opacity:1; transform:translateY(0) scale(1); }
+.ach-card:hover { box-shadow:var(--glow-purple); transform:scale(1.08)!important; }
+.ach-ico { font-size:clamp(30px,7vw,46px); display:block; margin-bottom:10px; }
+.ach-title { font-size:clamp(0.8rem,1.8vw,0.95rem); font-weight:700; color:var(--gold); }
 
-    .card:hover { 
-      transform: translateY(-10px); 
-      box-shadow: 0 35px 90px var(--accent-glow); 
-    }
+/* ============================================================
+   SCREEN 7 — FINAL
+   ============================================================ */
+#s7 { background:#030710; }
 
-    .contact-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2.2rem;
-      margin: 4.5rem auto;
-      max-width: 1200px;
-    }
+.laser {
+  position:fixed; width:2px; height:100%;
+  background:linear-gradient(180deg,transparent,var(--cyan),transparent);
+  animation:laserSwing 3s ease-in-out infinite; transform-origin:top center; opacity:0.25; pointer-events:none;
+}
+.laser:nth-child(2){ background:linear-gradient(180deg,transparent,var(--violet),transparent); animation-delay:1s; animation-duration:2.5s; }
+.laser:nth-child(3){ background:linear-gradient(180deg,transparent,var(--gold),transparent); animation-delay:2s; animation-duration:3.5s; }
+@keyframes laserSwing { 0%{transform:rotateZ(-45deg)} 50%{transform:rotateZ(45deg)} 100%{transform:rotateZ(-45deg)} }
 
-    .contact-box {
-      text-align: center;
-      padding: 2.4rem 1.8rem;
-    }
+.final-wrap { position:relative; z-index:1; max-width:min(700px,94vw); text-align:center; }
 
-    .contact-box h3 {
-      color: var(--accent);
-      font-size: clamp(1.9rem, 4.2vw, 2.4rem);
-      margin-bottom: 1.3rem;
-    }
+.final-tag {
+  display:inline-block; padding:8px 22px; border-radius:50px;
+  border:1px solid var(--gold-dim); color:var(--gold);
+  font-size:clamp(0.75rem,1.8vw,0.9rem); letter-spacing:2px; text-transform:uppercase;
+  margin-bottom:24px; animation:pulse 2s infinite;
+}
+.final-quote {
+  font-size:clamp(1rem,2.5vw,1.35rem); color:rgba(255,255,255,0.78);
+  margin-bottom:12px; line-height:1.65;
+  opacity:0; transform:translateY(18px); transition:opacity 0.7s, transform 0.7s;
+}
+.final-quote.show { opacity:1; transform:translateY(0); }
 
-    .contact-box p, .contact-box a {
-      font-size: 1.35rem;
-      color: var(--text);
-    }
+.final-big {
+  font-size:clamp(1.7rem,6vw,3.6rem); font-weight:900;
+  background:linear-gradient(90deg,var(--gold),var(--cyan),var(--violet),var(--gold));
+  background-size:200%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  animation:shimmer 3s linear infinite; margin:28px 0 14px;
+}
+.final-sub { font-size:clamp(0.9rem,2vw,1.15rem); color:rgba(255,255,255,0.68); line-height:1.7; margin-bottom:6px; }
+.final-awesome {
+  font-size:clamp(1.2rem,3vw,1.7rem); font-weight:800; color:var(--cyan);
+  text-shadow:var(--glow-cyan); margin-top:18px; animation:pulse 2s infinite;
+}
 
-    .contact-box a {
-      color: var(--accent);
-      text-decoration: none;
-      transition: all 0.3s;
-    }
+/* ============================================================
+   BUBBLES
+   ============================================================ */
+.bubble-p {
+  position:fixed; pointer-events:none; z-index:999; border-radius:50%;
+  will-change:transform,opacity;
+}
 
-    .contact-box a:hover { text-decoration: underline; opacity: 0.9; }
-
-    /* Login Modal & Auth Styles */
-    #authModal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(5, 5, 10, 0.92);
-      backdrop-filter: blur(8px);
-      z-index: 5000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-content {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 3rem 2.5rem;
-      width: 90%;
-      max-width: 460px;
-      box-shadow: 0 30px 100px rgba(0,0,0,0.7), 0 0 60px var(--accent-glow);
-      position: relative;
-      animation: modalPop 0.4s ease-out;
-    }
-
-    @keyframes modalPop {
-      from { transform: scale(0.88); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 1.2rem;
-      right: 1.6rem;
-      font-size: 2.2rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-
-    .close-btn:hover { color: var(--accent); }
-
-    .modal-content h2 {
-      text-align: center;
-      margin-bottom: 2.2rem;
-      font-size: 2.4rem;
-      color: var(--accent);
-    }
-
-    .form-group {
-      margin-bottom: 1.6rem;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 0.6rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 1rem 1.3rem;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      color: var(--text);
-      font-size: 1.1rem;
-      transition: all 0.3s;
-    }
-
-    .form-group input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 1.1rem;
-      background: linear-gradient(90deg, var(--accent), #5090e0);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.2rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.35s;
-      margin-top: 1rem;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px var(--accent-glow);
-    }
-
-    .modal-links {
-      text-align: center;
-      margin-top: 1.8rem;
-      font-size: 1.05rem;
-    }
-
-    .modal-links a {
-      color: var(--accent);
-      text-decoration: none;
-      margin: 0 1rem;
-      cursor: pointer;
-    }
-
-    .modal-links a:hover { text-decoration: underline; }
-
-    .error-message {
-      color: #ff6b6b;
-      font-size: 0.95rem;
-      margin-top: 0.5rem;
-      text-align: center;
-      display: none;
-    }
-
-    .success-message {
-      color: #70ff9e;
-      font-size: 1.1rem;
-      margin-top: 1rem;
-      text-align: center;
-      display: none;
-    }
-
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 1.5rem;
-      color: var(--accent);
-      cursor: pointer;
-    }
-
-    @media (max-width: 768px) {
-      header { padding: 1.1rem 5%; }
-      .brand { font-size: clamp(2.8rem, 9vw, 4rem); letter-spacing: 4px; }
-      nav { gap: 2rem; flex-wrap: wrap; justify-content: center; }
-      nav a { font-size: clamp(1.15rem, 4.5vw, 1.4rem); padding: 0.7rem 1rem; }
-      main { padding-top: 240px; }
-      .section { padding: 50px 5% 120px; }
-      .services-grid, .testimonials { grid-template-columns: 1fr; gap: 2.5rem; }
-      .testimonial, .service-card { padding: 2.2rem; }
-      h2.section-title { font-size: clamp(2.6rem, 8vw, 4.2rem); }
-      .contact-grid { grid-template-columns: 1fr; }
-      .header-container { flex-direction: column; align-items: flex-start; }
-      #loginBtn { margin-top: 1rem; align-self: flex-end; }
-    }
-  </style>
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:480px){
+  .welcome-card { padding:26px 18px; }
+  .cards-grid { gap:10px; }
+  .ach-card { padding:18px 12px; }
+  .wish-bubble { padding:14px 16px; }
+}
+</style>
 </head>
 <body>
 
-<div id="particles-js"></div>
+<canvas id="globalCanvas"></canvas>
 
-<header>
-  <div class="header-container">
-    <div class="brand">Refain</div>
-    <a id="loginBtn">Login</a>
+<!-- Music Button -->
+<div id="musicBtn" onclick="toggleMusic()">🎵 <span id="musicLabel">Music ON</span></div>
+
+<!-- ============================================================
+     SCREEN 1 — WELCOME
+     ============================================================ -->
+<section id="s1" class="screen active">
+  <div class="s1-stars" id="starBg"></div>
+  <div class="welcome-card">
+    <span class="welcome-emoji">🎉</span>
+    <h1 class="welcome-title">
+      Hey <span class="name-badge" id="heroName"></span>!<br>
+      Someone has something awesome for you!
+    </h1>
+    <p class="welcome-sub">A birthday surprise is waiting just for you 🎂</p>
+    <button class="btn-glow" onclick="launchSurprise()">Start The Surprise 🚀</button>
   </div>
-  
-  <nav>
-    <a onclick="showSection('home')" class="active">HOME</a>
-    <a onclick="showSection('service')">SERVICE</a>
-    <a onclick="showSection('about')">ABOUT</a>
-    <a onclick="showSection('contact')">CONTACT</a>
-    <a onclick="showSection('work gallery')">WORK GALLERY</a>
-  </nav>
-</header>
+</section>
 
-<main>
-  <!-- HOME SECTION -->
-  <div id="home" class="section active">
-    <h1>We Build Your <span class="highlight">YouTube Growth Funnel</span></h1>
-    <h1>to Unlock Your <span class="highlight">Maximum Potential</span></h1>
-
-    <div class="hero-video"></div>
-
-    <h2 class="section-title">Trusted by <span class="highlight">Creators & Brands</span></h2>
-
-    <div class="testimonials">
-      <div class="testimonial">
-        <div class="stars">★★★★★</div>
-        <p>"This team completely transformed my channel — editing is next level!"</p>
-      </div>
-      <div class="testimonial">
-        <div class="stars">★★★★★</div>
-        <p>"Super professional edits, fast turnaround, and massive retention boost."</p>
-      </div>
-      <div class="testimonial">
-        <div class="stars">★★★★★</div>
-        <p>"Best investment for my YouTube journey. Highly recommended!"</p>
-      </div>
-      <div class="testimonial">
-        <div class="stars">★★★★★</div>
-        <p>"Thumbnails are fire! CTR doubled in just one week."</p>
-      </div>
-      <div class="testimonial">
-        <div class="stars">★★★★★</div>
-        <p>"Attention to detail is insane. Feels like Hollywood level now."</p>
-      </div>
-    </div>
+<!-- ============================================================
+     SCREEN 2 — ROCKET TRANSITION (auto, no scroll needed)
+     ============================================================ -->
+<section id="s2" class="screen">
+  <div class="rocket-wrap">
+    <div class="rocket-emoji">🚀</div>
+    <p class="loading-text">Getting your birthday surprise ready<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
   </div>
+</section>
 
-  <!-- SERVICE SECTION -->
-  <div id="service" class="section">
-    <h2 class="section-title">Our <span class="highlight">Video Editing Services</span></h2>
-    
-    <div class="services-grid">
-      <div class="service-card">
-        <img src="https://thumbs.dreamstime.com/b/modern-video-editing-workstation-multiple-computer-monitors-audio-equipment-black-desk-neon-lighting-professional-437280885.jpg" alt="Long Form Editing">
-        <div class="service-content">
-          <h3>YouTube Long Form Editing</h3>
-          <p>We create professional long-form YouTube videos with smooth storytelling, engaging pacing, cinematic transitions, advanced color grading, and clear sound design. Perfect for vlogs, tech reviews, tutorials, documentaries and educational content.</p>
-        </div>
-      </div>
+<!-- ============================================================
+     SCREEN 3 — BIRTHDAY CELEBRATION
+     ============================================================ -->
+<section id="s3" class="screen">
+  <h2 class="bday-header">🎉 Happy Birthday, <span id="cakeName"></span>! 🎉</h2>
 
-      <div class="service-card">
-        <img src="https://images.stockcake.com/public/f/2/b/f2b0bc7e-2080-4aaf-aa5a-c5032519adbf/video-editing-suite-stockcake.jpg" alt="Shorts Editing">
-        <div class="service-content">
-          <h3>Shorts / Reels Editing</h3>
-          <p>High-retention short content editing optimized for TikTok, Instagram Reels, and YouTube Shorts. Includes animated captions, zoom cuts, sound effects, trendy transitions and viral pacing to boost engagement.</p>
-        </div>
-      </div>
-
-      <div class="service-card">
-        <img src="https://digitalpress.fra1.cdn.digitaloceanspaces.com/wm8t41f/2025/06/Before-and-after-YouTube-Thumbnail-Types.png" alt="Thumbnail Design">
-        <div class="service-content">
-          <h3>Thumbnail Design</h3>
-          <p>Eye-catching high CTR thumbnail designs with bold typography, strong contrast, emotional expressions and strategic layout to increase click-through rate and attract more viewers.</p>
-        </div>
-      </div>
-
-      <div class="service-card">
-        <img src="https://thumbs.dreamstime.com/b/video-editor-cuting-footage-working-film-editing-montage-computer-dual-monitors-setup-multimedia-creative-agency-230796827.jpg" alt="Color Grading">
-        <div class="service-content">
-          <h3>Color Grading & Motion Graphics</h3>
-          <p>Professional cinematic color correction, LUT application, motion graphics animation, logo intro/outro creation, and full visual enhancement for a premium brand look.</p>
-        </div>
-      </div>
-
-      <div class="service-card">
-        <img src="https://images.squarespace-cdn.com/content/v1/54f7dbd2e4b0237917952640/ecf5a57d-9488-4190-b1a2-f1b8b808a674/dc04ce62-bc12-41ae-9b64-864e935d09c6.jpg" alt="Growth Package">
-        <div class="service-content">
-          <h3>Complete Channel Growth Package</h3>
-          <p>Full YouTube optimization package including editing, thumbnails, content structure improvement, audience retention boost, SEO optimization and channel growth strategy.</p>
-        </div>
-      </div>
-    </div>
+  <div class="cake-wrap">
+    <svg class="cake-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="185" rx="90" ry="10" fill="#111" opacity="0.4"/>
+      <rect x="20" y="130" width="160" height="55" rx="12" fill="#5b2d8e"/>
+      <rect x="35" y="90" width="130" height="48" rx="10" fill="#8e44d6"/>
+      <rect x="55" y="58" width="90" height="40" rx="8" fill="#b07fff"/>
+      <path d="M55 58 Q65 52 75 58 Q85 52 95 58 Q105 52 115 58 Q125 52 135 58 Q145 52 145 58" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M35 90 Q50 83 65 90 Q80 83 95 90 Q110 83 125 90 Q140 83 155 90 Q165 83 165 90" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <text x="45" y="118" font-size="14" fill="#ffd700">★</text>
+      <text x="155" y="118" font-size="14" fill="#ffd700">★</text>
+      <text x="38" y="160" font-size="12" fill="#00e5ff">♦</text>
+      <text x="160" y="160" font-size="12" fill="#00e5ff">♦</text>
+      <rect x="72" y="38" width="8" height="22" rx="4" fill="#ff6b6b"/>
+      <rect x="96" y="32" width="8" height="28" rx="4" fill="#ffd700"/>
+      <rect x="120" y="38" width="8" height="22" rx="4" fill="#00e5ff"/>
+      <rect x="84" y="35" width="8" height="25" rx="4" fill="#ff9f43"/>
+      <rect x="108" y="35" width="8" height="25" rx="4" fill="#a29bfe"/>
+      <ellipse class="flame" cx="76"  cy="36" rx="5" ry="8" fill="#ffcc00" opacity="0.9"/>
+      <ellipse class="flame" cx="100" cy="30" rx="5" ry="8" fill="#ff6348" opacity="0.9"/>
+      <ellipse class="flame" cx="124" cy="36" rx="5" ry="8" fill="#00e5ff" opacity="0.9"/>
+      <ellipse class="flame" cx="88"  cy="33" rx="4" ry="7" fill="#ffd700" opacity="0.9"/>
+      <ellipse class="flame" cx="112" cy="33" rx="4" ry="7" fill="#a29bfe" opacity="0.9"/>
+    </svg>
   </div>
 
-  <!-- ABOUT SECTION -->
-  <div id="about" class="section">
-    <h2 class="section-title">About Me</h2>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto;">
-      <div class="card">
-        <h3 style="color: var(--accent); font-size: clamp(2.1rem, 4.5vw, 2.6rem); margin-bottom: 1.5rem;">My Skills</h3>
-        <p>আমি Premiere Pro, After Effects, DaVinci Resolve দিয়ে কাজ করি। Cinematic editing, color grading, motion graphics, sound design – সবকিছুতেই দক্ষ।<br><br>
-        Retention বাড়ানোর জন্য storytelling + pacing এ আমার বিশেষ ফোকাস থাকে।<br><br>
-        [এখানে আরও স্কিল যোগ করতে পারো...]</p>
-      </div>
-
-      <div class="card">
-        <h3 style="color: var(--accent); font-size: clamp(2.1rem, 4.5vw, 2.6rem); margin-bottom: 1.5rem;">My Time</h3>
-        <p>প্রতি প্রজেক্টে সময় দেই quality এর উপর ফোকাস করে।<br><br>
-        Long form video: ৩–৭ দিন (length + complexity এর উপর)<br>
-        Shorts/Reels: ১–৩ দিন<br>
-        Thumbnail pack: ২–৪ দিন<br><br>
-        Rush delivery ও সম্ভব (অতিরিক্ত চার্জে)।<br><br>
-        [এখানে তোমার availability / সময়সূচী লিখতে পারো...]</p>
-      </div>
-    </div>
+  <div class="bday-msg-wrap">
+    <span id="typingMsg"></span>
   </div>
 
-  <!-- CONTACT SECTION -->
-  <div id="contact" class="section">
-    <h2 class="section-title">Get In Touch</h2>
-    
-    <div class="contact-grid">
-      <div class="card contact-box">
-        <h3>Phone Number</h3>
-        <p>[এখানে তোমার নম্বর দাও]</p>
-      </div>
-      
-      <div class="card contact-box">
-        <h3>Facebook</h3>
-        <p><a href="[এখানে তোমার FB profile link দাও]">যোগাযোগ করো →</a></p>
-      </div>
-      
-      <div class="card contact-box">
-        <h3>Instagram</h3>
-        <p><a href="[এখানে Instagram link দাও]">ফলো করো →</a></p>
-      </div>
-      
-      <div class="card contact-box">
-        <h3>Twitter / X</h3>
-        <p><a href="[এখানে Twitter/X link দাও]">ফলো করো →</a></p>
-      </div>
-      
-      <div class="card contact-box">
-        <h3>Email</h3>
-        <p><a href="mailto:refain38@gmail.com">refain38@gmail.com</a></p>
-      </div>
-    </div>
+  <!-- NEXT BUTTON — always visible, scroll down to see it -->
+  <div style="margin-top:32px; padding-bottom:20px;">
+    <button class="btn-glow" onclick="goTo(4)">Open Your Gift 🎁</button>
   </div>
 
-  <!-- WORK GALLERY SECTION -->
-  <div id="work gallery" class="section">
-    <h2 class="section-title">Our Work Gallery</h2>
-    <div class="card">
-      <h3 style="color: var(--accent); font-size: clamp(2.1rem, 4.5vw, 2.6rem); margin-bottom: 1.5rem;">Gallery Coming Soon</h3>
-      <p>এখানে শীঘ্রই আমার কাজের সেরা সেরা ভিডিও, থাম্বনেইল এবং শর্টস এর উদাহরণ যোগ করা হবে।<br><br>
-      [এখানে ছবি/ভিডিও এম্বেড করতে পারো পরে...]</p>
+  <div class="scroll-hint">⌄</div>
+</section>
+
+<!-- ============================================================
+     SCREEN 4 — GIFT BOX
+     ============================================================ -->
+<section id="s4" class="screen">
+  <div class="gift-section">
+    <h2>A Special Gift For You 🎁</h2>
+    <p class="gift-sub">Click the gift box to open your surprise!</p>
+
+    <div class="gift-box-wrap" id="giftBox" onclick="openGift()">
+      <svg class="gift-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="90" width="160" height="100" rx="10" fill="#6c2bd9"/>
+        <rect x="20" y="90" width="160" height="100" rx="10" fill="url(#gboxGrad)"/>
+        <rect id="giftLid" x="10" y="65" width="180" height="35" rx="8" fill="#9b59f5"/>
+        <rect x="92" y="65" width="16" height="125" fill="#ffd700"/>
+        <rect x="10" y="82" width="180" height="16" fill="#ffd700"/>
+        <ellipse cx="84"  cy="65" rx="22" ry="14" fill="#ffd700" transform="rotate(-30,84,65)"/>
+        <ellipse cx="116" cy="65" rx="22" ry="14" fill="#ffd700" transform="rotate(30,116,65)"/>
+        <circle cx="100" cy="65" r="12" fill="#ffec6e"/>
+        <text x="38"  y="150" font-size="16" fill="rgba(255,255,255,0.3)">★</text>
+        <text x="145" y="150" font-size="16" fill="rgba(255,255,255,0.3)">★</text>
+        <defs>
+          <linearGradient id="gboxGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.08)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,0.2)"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <p class="gift-hint" id="giftHint">👆 Click to open!</p>
+    <div class="gift-opened-msg" id="giftMsg">🎉 Surprise! You're Amazing! 🎉</div>
+
+    <div style="margin-top:24px; padding-bottom:20px;">
+      <button class="btn-outline btn-hidden" id="btnAfterGift" onclick="goTo(5)">See Your Wishes 💌</button>
     </div>
   </div>
+  <div class="scroll-hint">⌄</div>
+</section>
 
-</main>
-
-<!-- ──────────────── Login / Auth Modal (এটা রাখা আছে কারণ এটা ছাড়া লগইন বাটন কাজ করবে না) ──────────────── -->
-<div id="authModal">
-  <div class="modal-content">
-
-    <div id="loginScreen">
-      <span class="close-btn" id="closeAuth">&times;</span>
-      <h2>Login to Refain</h2>
-      
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" placeholder="your@email.com" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="••••••••" required>
-        </div>
-        
-        <div id="loginError" class="error-message"></div>
-        <div id="loginSuccess" class="success-message"></div>
-        
-        <button type="submit" class="btn-primary">Login</button>
-      </form>
-      
-      <div class="modal-links">
-        <a id="showRegisterLink">Create account</a>
-        <a id="showForgotLink">Forgot password?</a>
-      </div>
+<!-- ============================================================
+     SCREEN 5 — WISHES
+     ============================================================ -->
+<section id="s5" class="screen">
+  <div class="wishes-wrap">
+    <h2 class="section-title">💌 Birthday Wishes For You</h2>
+    <div id="wishList"></div>
+    <div style="margin-top:28px; padding-bottom:20px; text-align:center;">
+      <button class="btn-glow btn-hidden" id="btnWishes" onclick="goTo(6)">See Your Awards 🏆</button>
     </div>
-
-    <div id="registerScreen" style="display:none;">
-      <span class="close-btn" id="closeAuth">&times;</span>
-      <h2>Create Account</h2>
-      
-      <form id="registerForm">
-        <div class="form-group">
-          <label for="regEmail">Email</label>
-          <input type="email" id="regEmail" placeholder="your@email.com" required>
-        </div>
-        
-        <div class="form-group">
-          <label for="regPass">Password</label>
-          <input type="password" id="regPass" placeholder="••••••••" required minlength="6">
-        </div>
-        
-        <div class="form-group">
-          <label for="regConfirm">Confirm Password</label>
-          <input type="password" id="regConfirm" placeholder="••••••••" required>
-        </div>
-        
-        <div id="regError" class="error-message"></div>
-        <div id="regSuccess" class="success-message"></div>
-        
-        <button type="submit" class="btn-primary">Create Account</button>
-      </form>
-      
-      <a class="back-link" id="backToLoginFromReg">← Back to Login</a>
-    </div>
-
-    <div id="forgotScreen" style="display:none;">
-      <span class="close-btn" id="closeAuth">&times;</span>
-      <h2>Reset Password</h2>
-      
-      <form id="forgotForm">
-        <div class="form-group">
-          <label for="forgotEmail">Your Email</label>
-          <input type="email" id="forgotEmail" placeholder="your@email.com" required>
-        </div>
-        
-        <div id="forgotError" class="error-message"></div>
-        <div id="forgotSuccess" class="success-message"></div>
-        
-        <button type="submit" class="btn-primary">Send Reset Link</button>
-      </form>
-
-      <form id="resetPassForm" style="display:none;">
-        <div class="form-group">
-          <label for="newPass">New Password</label>
-          <input type="password" id="newPass" placeholder="••••••••" required minlength="6">
-        </div>
-        <div class="form-group">
-          <label for="confirmNew">Confirm New Password</label>
-          <input type="password" id="confirmNew" placeholder="••••••••" required>
-        </div>
-        
-        <div id="resetError" class="error-message"></div>
-        <div id="resetSuccess" class="success-message"></div>
-        
-        <button type="submit" class="btn-primary">Update Password</button>
-      </form>
-      
-      <a class="back-link" id="backToLoginFromForgot">← Back to Login</a>
-    </div>
-
   </div>
-</div>
+  <div class="scroll-hint">⌄</div>
+</section>
 
-<!-- ──────────────── Core Website Scripts (particles, nav, scroll) ──────────────── -->
+<!-- ============================================================
+     SCREEN 6 — ACHIEVEMENT CARDS
+     ============================================================ -->
+<section id="s6" class="screen">
+  <div class="achieve-wrap">
+    <h2 class="section-title">🏅 Your Greatest Titles</h2>
+    <div class="cards-grid" id="cardsGrid"></div>
+    <div style="padding-bottom:20px;">
+      <button class="btn-glow btn-hidden" id="btnAchieve" onclick="goTo(7)">Final Celebration 🌟</button>
+    </div>
+  </div>
+  <div class="scroll-hint">⌄</div>
+</section>
+
+<!-- ============================================================
+     SCREEN 7 — FINAL
+     ============================================================ -->
+<section id="s7" class="screen">
+  <div class="laser" style="left:18%"></div>
+  <div class="laser" style="left:50%"></div>
+  <div class="laser" style="left:82%"></div>
+
+  <div class="final-wrap">
+    <div class="final-tag">✨ A Night To Remember ✨</div>
+
+    <p class="final-quote" data-delay="200">🌈 Friends make life more colorful.</p>
+    <p class="final-quote" data-delay="700">❤️ Thank you for every great memory.</p>
+    <p class="final-quote" data-delay="1200">🚀 Here's to many more adventures together.</p>
+
+    <div class="final-big">🎉 Happy Birthday, <span id="finalName"></span>! 🎉</div>
+    <p class="final-sub">Wishing you happiness, success, good health,</p>
+    <p class="final-sub">and unforgettable memories.</p>
+    <p class="final-awesome">Stay Awesome! 😎</p>
+
+    <div style="height:40px;"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
 <script>
-particlesJS("particles-js", {
-  "particles": {
-    "number": {"value": 90, "density": {"enable": true, "value_area": 900}},
-    "color": {"value": ["#70b8ff","#a0d0ff","#c0e0ff","#90c8ff"]},
-    "opacity": {"value": 0.65, "random": true, "anim": {"enable": true, "speed": 1.2, "opacity_min": 0.15}},
-    "size": {"value": 3.5, "random": true},
-    "line_linked": {"enable": true, "distance": 140, "color": "#70b8ff", "opacity": 0.4, "width": 1.2},
-    "move": {"enable": true, "speed": 1.4, "direction": "none", "random": true, "straight": false, "out_mode": "out"}
-  },
-  "interactivity": {
-    "events": {"onhover": {"enable": true, "mode": "grab"}, "onclick": {"enable": true, "mode": "push"}},
-    "modes": {"grab": {"distance": 160, "line_linked": {"opacity": 0.7}}, "push": {"particles_nb": 5}}
-  },
-  "retina_detect": true
-});
+/* ================================================================
+   ✏️  EASY EDIT — শুধু এখানে নাম বদলাও!
+   ================================================================ */
+const CONFIG = {
+  recipientName: "Bro",    // ← এখানে শুধু নাম বদলাও
 
-function showSection(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-  const clicked = document.querySelector(`nav a[onclick="showSection('${id}')"]`);
-  if (clicked) clicked.classList.add('active');
+  typingMessage: "Today is your special day! You deserve all the joy, laughter, and love the world has to offer. May this year bring you incredible adventures, boundless happiness, and every dream your heart desires. You're truly one of a kind! 🎂✨",
+
+  wishes: [
+    { icon:"🎂", text:"Happy Birthday! May this year be your best one yet." },
+    { icon:"☀️", text:"Wishing you endless happiness and bright sunny days." },
+    { icon:"💪", text:"Stay healthy, stay strong — you're unstoppable." },
+    { icon:"🚀", text:"Keep chasing your dreams — the sky isn't the limit." },
+    { icon:"🏆", text:"May success always walk beside you." },
+    { icon:"❤️", text:"Thank you for being such an amazing friend." },
+    { icon:"🌟", text:"Hope we create many more unforgettable memories together." },
+  ],
+
+  achievements: [
+    { icon:"🏆", title:"Best Friend" },
+    { icon:"😂", title:"Funniest Person" },
+    { icon:"💪", title:"Strongest Support" },
+    { icon:"🎯", title:"Dream Chaser" },
+    { icon:"🔥", title:"Legend" },
+  ]
+};
+
+/* ================================================================
+   INJECT NAMES
+   ================================================================ */
+document.getElementById('heroName').textContent  = CONFIG.recipientName;
+document.getElementById('cakeName').textContent  = CONFIG.recipientName;
+document.getElementById('finalName').textContent = CONFIG.recipientName;
+
+/* ================================================================
+   BIRTHDAY MUSIC  (Web Audio API — no file needed)
+   ================================================================ */
+let audioCtx   = null;
+let musicOn    = false;
+let musicTimer = null;
+
+const MELODY = [
+  [261.63,.30],[261.63,.15],[293.66,.45],[261.63,.45],[349.23,.45],[329.63,.90],
+  [261.63,.30],[261.63,.15],[293.66,.45],[261.63,.45],[392.00,.45],[349.23,.90],
+  [261.63,.30],[261.63,.15],[523.25,.45],[440.00,.45],[349.23,.45],[329.63,.45],[293.66,.90],
+  [466.16,.30],[466.16,.15],[440.00,.45],[349.23,.45],[392.00,.45],[349.23,1.00],
+];
+
+function ensureCtx(){
+  if(!audioCtx) audioCtx = new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
 }
 
-// Scroll hide header
-let lastScrollTop = 0;
-const header = document.querySelector('header');
+function scheduleNote(freq, start, dur, vol=0.2, type='triangle'){
+  const osc = audioCtx.createOscillator();
+  const g   = audioCtx.createGain();
+  osc.connect(g); g.connect(audioCtx.destination);
+  osc.type = type; osc.frequency.value = freq;
+  g.gain.setValueAtTime(0, start);
+  g.gain.linearRampToValueAtTime(vol, start+0.03);
+  g.gain.setValueAtTime(vol, start+dur-0.05);
+  g.gain.linearRampToValueAtTime(0, start+dur);
+  osc.start(start); osc.stop(start+dur);
+}
 
-window.addEventListener("scroll", function () {
-  let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-
-  if (currentScroll < 20) {
-    header.classList.remove("hidden");
-    return;
+function playSong(offset=0.1){
+  if(!musicOn) return;
+  let t = audioCtx.currentTime + offset;
+  for(const [f,d] of MELODY){
+    scheduleNote(f, t, d*0.93, 0.22, 'triangle');
+    scheduleNote(f*0.5, t, d*0.93, 0.07, 'sine');
+    t += d;
   }
+  const len = MELODY.reduce((s,[,d])=>s+d, 0);
+  musicTimer = setTimeout(()=>playSong(0.05), (len-0.15)*1000);
+}
 
-  header.classList.add("hidden");
-  lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
-}, false);
-</script>
+function startMusic(){
+  ensureCtx();
+  musicOn = true;
+  playSong();
+  document.getElementById('musicLabel').textContent = 'Music ON';
+  document.getElementById('musicBtn').classList.add('show');
+}
+function stopMusic(){
+  musicOn = false;
+  clearTimeout(musicTimer);
+  document.getElementById('musicLabel').textContent = 'Music OFF';
+}
+function toggleMusic(){
+  musicOn ? stopMusic() : (ensureCtx(), startMusic());
+}
 
-<!-- ──────────────── Login / Authentication System (এটা পুরোপুরি আলাদা — কেটে ফেললেও ওয়েবসাইট চলবে) ──────────────── -->
-<script>
-// এই অংশটা কেটে দিলে লগইন বাটন কাজ করবে না, কিন্তু বাকি সব (হোম, সার্ভিস, নেভ, পার্টিকল) ঠিক থাকবে
-
-const authModal = document.getElementById('authModal');
-const loginBtn = document.getElementById('loginBtn');
-
-if (authModal && loginBtn) {
-
-  const closeAuth = document.getElementById('closeAuth');
-
-  function openAuth() {
-    authModal.style.display = 'flex';
-    document.getElementById('loginScreen').style.display = 'block';
-    document.getElementById('registerScreen').style.display = 'none';
-    document.getElementById('forgotScreen').style.display = 'none';
-    clearMessages();
+/* ================================================================
+   STARS
+   ================================================================ */
+(()=>{
+  const wrap = document.getElementById('starBg');
+  for(let i=0;i<120;i++){
+    const s = document.createElement('span');
+    const sz = Math.random()*3+1;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*3+2).toFixed(1)}s;--del:${(Math.random()*4).toFixed(1)}s;`;
+    wrap.appendChild(s);
   }
+})();
 
-  function closeAllAuth() {
-    authModal.style.display = 'none';
-  }
+/* ================================================================
+   FIREWORKS + CONFETTI CANVAS
+   ================================================================ */
+const canvas=document.getElementById('globalCanvas');
+const ctx2=canvas.getContext('2d');
+let W,H;
+const parts=[];
+let fwActive=false;
 
-  loginBtn.addEventListener('click', openAuth);
-  closeAuth.addEventListener('click', closeAllAuth);
-  authModal.addEventListener('click', e => {
-    if (e.target === authModal) closeAllAuth();
-  });
+function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+resize(); window.addEventListener('resize',resize);
 
-  function clearMessages() {
-    document.querySelectorAll('.error-message, .success-message').forEach(el => {
-      el.textContent = '';
-      el.style.display = 'none';
-    });
-  }
-
-  function getUsers() { return JSON.parse(localStorage.getItem('refain_users') || '{}'); }
-  function saveUsers(users) { localStorage.setItem('refain_users', JSON.stringify(users)); }
-
-  // Login
-  document.getElementById('loginForm').addEventListener('submit', e => {
-    e.preventDefault();
-    clearMessages();
-
-    const email = document.getElementById('email').value.trim().toLowerCase();
-    const pass = document.getElementById('password').value;
-    const users = getUsers();
-
-    if (users[email] && users[email] === pass) {
-      document.getElementById('loginSuccess').textContent = "Login successful!";
-      document.getElementById('loginSuccess').style.display = 'block';
-      setTimeout(() => {
-        closeAllAuth();
-        alert("Logged in! (এখানে dashboard খুলবে)");
-      }, 1200);
+class P{
+  constructor(x,y,fw){
+    this.x=x;this.y=y;this.fw=fw;
+    if(fw){
+      const a=Math.random()*Math.PI*2,sp=Math.random()*6+2;
+      this.vx=Math.cos(a)*sp;this.vy=Math.sin(a)*sp;
+      this.life=1;this.dec=Math.random()*0.018+0.012;
+      this.color=`hsl(${[45,200,270,0,120,30][Math.floor(Math.random()*6)]},100%,${Math.random()*30+55}%)`;
+      this.sz=Math.random()*3+1;
     } else {
-      document.getElementById('loginError').textContent = "Invalid email or password";
-      document.getElementById('loginError').style.display = 'block';
+      this.vx=(Math.random()-.5)*4;this.vy=Math.random()*3+2;
+      this.life=1;this.dec=0.0045;
+      this.color=['#ffd700','#00e5ff','#ff6b6b','#a29bfe','#ff9f43','#55efc4'][Math.floor(Math.random()*6)];
+      this.sz=Math.random()*7+3;this.rot=Math.random()*360;this.rv=(Math.random()-.5)*8;
+      this.rect=Math.random()>.5;
     }
-  });
-
-  // Register
-  document.getElementById('registerForm').addEventListener('submit', e => {
-    e.preventDefault();
-    clearMessages();
-
-    const email = document.getElementById('regEmail').value.trim().toLowerCase();
-    const pass = document.getElementById('regPass').value;
-    const confirm = document.getElementById('regConfirm').value;
-
-    if (pass !== confirm) {
-      document.getElementById('regError').textContent = "Passwords do not match";
-      document.getElementById('regError').style.display = 'block';
-      return;
+  }
+  update(){
+    this.x+=this.vx;this.y+=this.vy;
+    if(this.fw){this.vy+=0.09;this.vx*=0.98;}
+    else{this.vy+=0.04;this.rot+=this.rv;}
+    this.life-=this.dec;
+  }
+  draw(){
+    ctx2.save();ctx2.globalAlpha=Math.max(0,this.life);
+    if(this.fw){
+      ctx2.beginPath();ctx2.arc(this.x,this.y,this.sz,0,Math.PI*2);
+      ctx2.fillStyle=this.color;ctx2.shadowBlur=10;ctx2.shadowColor=this.color;ctx2.fill();
+    } else {
+      ctx2.translate(this.x,this.y);ctx2.rotate(this.rot*Math.PI/180);ctx2.fillStyle=this.color;
+      if(this.rect) ctx2.fillRect(-this.sz/2,-this.sz/4,this.sz,this.sz/2);
+      else{ctx2.beginPath();ctx2.arc(0,0,this.sz/2,0,Math.PI*2);ctx2.fill();}
     }
-
-    const users = getUsers();
-    if (users[email]) {
-      document.getElementById('regError').textContent = "Email already exists";
-      document.getElementById('regError').style.display = 'block';
-      return;
-    }
-
-    users[email] = pass;
-    saveUsers(users);
-
-    document.getElementById('regSuccess').textContent = "Account created! Login now.";
-    document.getElementById('regSuccess').style.display = 'block';
-    setTimeout(() => {
-      document.getElementById('loginScreen').style.display = 'block';
-      document.getElementById('registerScreen').style.display = 'none';
-    }, 1500);
-  });
-
-  // Forgot + Reset
-  let resetEmail = null;
-
-  document.getElementById('forgotForm').addEventListener('submit', e => {
-    e.preventDefault();
-    clearMessages();
-
-    const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
-    const users = getUsers();
-
-    if (!users[email]) {
-      document.getElementById('forgotError').textContent = "Email not found";
-      document.getElementById('forgotError').style.display = 'block';
-      return;
-    }
-
-    resetEmail = email;
-    document.getElementById('forgotSuccess').textContent = "Now set your new password";
-    document.getElementById('forgotSuccess').style.display = 'block';
-
-    document.getElementById('forgotForm').style.display = 'none';
-    document.getElementById('resetPassForm').style.display = 'block';
-  });
-
-  document.getElementById('resetPassForm').addEventListener('submit', e => {
-    e.preventDefault();
-    clearMessages();
-
-    const newPass = document.getElementById('newPass').value;
-    const confirm = document.getElementById('confirmNew').value;
-
-    if (newPass !== confirm) {
-      document.getElementById('resetError').textContent = "Passwords do not match";
-      document.getElementById('resetError').style.display = 'block';
-      return;
-    }
-
-    const users = getUsers();
-    users[resetEmail] = newPass;
-    saveUsers(users);
-
-    document.getElementById('resetSuccess').textContent = "Password updated! Login now.";
-    document.getElementById('resetSuccess').style.display = 'block';
-
-    setTimeout(() => {
-      document.getElementById('loginScreen').style.display = 'block';
-      document.getElementById('forgotScreen').style.display = 'none';
-      resetEmail = null;
-    }, 1800);
-  });
-
-  // Switch between forms
-  document.getElementById('showRegisterLink').onclick = () => {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('registerScreen').style.display = 'block';
-  };
-
-  document.getElementById('showForgotLink').onclick = () => {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('forgotScreen').style.display = 'block';
-  };
-
-  document.getElementById('backToLoginFromReg').onclick = () => {
-    document.getElementById('registerScreen').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'block';
-  };
-
-  document.getElementById('backToLoginFromForgot').onclick = () => {
-    document.getElementById('forgotScreen').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'block';
-    document.getElementById('forgotForm').style.display = 'block';
-    document.getElementById('resetPassForm').style.display = 'none';
-  };
-
+    ctx2.restore();
+  }
 }
-</script>
 
+function firework(x,y){ for(let i=0;i<100;i++) parts.push(new P(x,y,true)); }
+function confettiDrop(){ for(let i=0;i<8;i++) parts.push(new P(Math.random()*W,-10,false)); }
+let lfw=0,lco=0;
+function loop(ts){
+  ctx2.clearRect(0,0,W,H);
+  if(fwActive){
+    if(ts-lfw>900){lfw=ts;firework(Math.random()*W,Math.random()*H*.6);}
+    if(ts-lco>120){lco=ts;confettiDrop();}
+  }
+  for(let i=parts.length-1;i>=0;i--){parts[i].update();parts[i].draw();if(parts[i].life<=0)parts.splice(i,1);}
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+function burstFW(n=5){ for(let i=0;i<n;i++) setTimeout(()=>firework(Math.random()*W,Math.random()*H*.55),i*280); }
+function burstConf(n=200){ for(let i=0;i<n;i++) parts.push(new P(Math.random()*W,-10,false)); }
+
+/* ================================================================
+   MINI BUBBLES
+   ================================================================ */
+const BC=['rgba(0,229,255,.75)','rgba(255,215,0,.75)','rgba(155,89,245,.75)','rgba(255,107,107,.75)','rgba(85,239,196,.75)','rgba(255,159,67,.75)'];
+function bubble(){
+  const el=document.createElement('div');
+  el.className='bubble-p';
+  const sz=Math.random()*16+7;
+  const cl=BC[Math.floor(Math.random()*BC.length)];
+  el.style.cssText=`width:${sz}px;height:${sz}px;background:${cl};box-shadow:0 0 ${sz}px ${cl};left:${Math.random()*100}vw;top:${H+sz}px;`;
+  document.body.appendChild(el);
+  const dur=Math.random()*3500+5000;
+  el.animate([{transform:`translateY(0) translateX(0)`,opacity:.9},{transform:`translateY(-${H+60}px) translateX(${(Math.random()-.5)*140}px)`,opacity:0}],{duration:dur,easing:'ease-in-out'}).onfinish=()=>el.remove();
+}
+
+/* ================================================================
+   SCREEN FLOW
+   ================================================================ */
+let cur=1;
+function goTo(n){
+  const prev=document.getElementById('s'+cur);
+  prev.classList.remove('active');
+  // reset scroll of previous screen
+  prev.scrollTop=0;
+  setTimeout(()=>{
+    const next=document.getElementById('s'+n);
+    next.scrollTop=0;
+    next.classList.add('active');
+    cur=n;
+    onEnter(n);
+  },450);
+}
+
+function onEnter(n){
+  if(n===2) doS2();
+  if(n===3) doS3();
+  if(n===4){ fwActive=false; giftOpened=false; }
+  if(n===5) doS5();
+  if(n===6) doS6();
+  if(n===7) doS7();
+}
+
+/* ================================================================
+   S1 — LAUNCH
+   ================================================================ */
+function launchSurprise(){
+  startMusic();
+  burstFW(4);
+  goTo(2);
+}
+
+/* ================================================================
+   S2 — TRANSITION
+   ================================================================ */
+function doS2(){
+  fwActive=true; burstConf(140);
+  for(let i=0;i<8;i++) setTimeout(bubble,i*350);
+  setTimeout(()=>goTo(3),3300);
+}
+
+/* ================================================================
+   S3 — BIRTHDAY + TYPING
+   ================================================================ */
+function doS3(){
+  fwActive=true; burstFW(6);
+  for(let i=0;i<12;i++) setTimeout(bubble,i*300);
+  const el=document.getElementById('typingMsg');
+  el.textContent='';
+  let i=0;
+  const txt=CONFIG.typingMessage;
+  (function type(){ if(i<txt.length){el.textContent+=txt[i++];setTimeout(type,28);} })();
+}
+
+/* ================================================================
+   S4 — GIFT
+   ================================================================ */
+let giftOpened=false;
+function openGift(){
+  if(giftOpened) return;
+  giftOpened=true; fwActive=true;
+  burstFW(8); burstConf(280);
+  for(let i=0;i<18;i++) setTimeout(bubble,i*140);
+  document.getElementById('giftLid').animate(
+    [{transform:'translateY(0)',opacity:1},{transform:'translateY(-130px) rotate(22deg)',opacity:0}],
+    {duration:550,fill:'forwards',easing:'cubic-bezier(0.22,1,0.36,1)'}
+  );
+  document.getElementById('giftHint').style.display='none';
+  setTimeout(()=>{
+    document.getElementById('giftMsg').classList.add('show');
+    document.getElementById('btnAfterGift').classList.add('show');
+  },700);
+}
+
+/* ================================================================
+   S5 — WISHES
+   ================================================================ */
+function doS5(){
+  fwActive=false;
+  const list=document.getElementById('wishList');
+  list.innerHTML='';
+  CONFIG.wishes.forEach((w,i)=>{
+    const d=document.createElement('div');
+    d.className='wish-bubble';
+    d.innerHTML=`<span class="wi">${w.icon}</span><span>${w.text}</span>`;
+    list.appendChild(d);
+    setTimeout(()=>d.classList.add('show'),280+i*340);
+  });
+  setTimeout(()=>document.getElementById('btnWishes').classList.add('show'), 280+CONFIG.wishes.length*340+400);
+}
+
+/* ================================================================
+   S6 — ACHIEVEMENTS
+   ================================================================ */
+function doS6(){
+  fwActive=false;
+  const grid=document.getElementById('cardsGrid');
+  grid.innerHTML='';
+  CONFIG.achievements.forEach((a,i)=>{
+    const c=document.createElement('div');
+    c.className='ach-card';
+    c.innerHTML=`<span class="ach-ico">${a.icon}</span><span class="ach-title">${a.title}</span>`;
+    grid.appendChild(c);
+    setTimeout(()=>c.classList.add('show'),280+i*280);
+  });
+  setTimeout(()=>document.getElementById('btnAchieve').classList.add('show'), 280+CONFIG.achievements.length*280+500);
+}
+
+/* ================================================================
+   S7 — FINAL
+   ================================================================ */
+function doS7(){
+  fwActive=true; burstFW(10); burstConf(350);
+  for(let i=0;i<25;i++) setTimeout(bubble,i*200);
+  document.querySelectorAll('.final-quote').forEach(q=>{
+    setTimeout(()=>q.classList.add('show'),parseInt(q.dataset.delay||0));
+  });
+  setInterval(()=>{burstFW(2);for(let i=0;i<4;i++)bubble();},3200);
+}
+
+</script>
 </body>
 </html>
